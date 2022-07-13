@@ -838,6 +838,128 @@ WHERE komutu gruplama fonksiyonları ile kullanılmadığından aynı görevi ya
 
 
 
+# Union
+
+Farklı tablolardan verileri çekip bir arada göstermeye yararlar. Farklı isimlerdeki fakat aynı türdeki kolonları bir araya getirerek diğerinin altına ekler ve ona göre bunu gösterir.
+
+    select sehir_isim from sehirler union select isim from uyeler;
+
+    +------------+
+    | sehir_isim |
+    +------------+
+    | İstanbul   |
+    | Konya      |
+    | Ankara     |
+    | İzmir      |
+    | Igdir      |
+    | ahmet      |
+    | ayşe       |
+    | kerim      |
+    | buse       |
+    | neriman    |
+    +------------+
+
+
+Union kullanınca tekrar eden değerler tekrar etmez fakat union all kullanınca değerler tekrar edebilir.
+
+    select sehir_isim from sehirler union all select sehir from uyeler;
+
+    +------------+
+    | sehir_isim |
+    +------------+
+    | İstanbul   |
+    | Konya      |
+    | Ankara     |
+    | İzmir      |
+    | Igdir      |
+    | İstanbul   |
+    | Ankara     |
+    | İzmir      |
+    | Antalya    |
+    | Konya      |
+    | İstanbul   |
+    +------------+
+
+
+
+
+
+
+
+# any, some, all, in, not
+
+
+
+## any
+
+Any ile alt sorguya bakar içerisinden 1 tanesi bile True döndürse bu sefer True olan değerleri verir.
+
+    select * from uyeler where sehir = ANY (select sehir from uyeler where yas > 40);
+
+
+    +---------+--------+-----+-----------+---------+
+    | isim    | soyad  | yas | sehir     | agirlik |
+    +---------+--------+-----+-----------+---------+
+    | ahmet   | kaya   |  40 | İstanbul  | NULL    |
+    | neriman | duran  |  55 | Konya     | NULL    |
+    | ahmet   | arslan |  56 | İstanbul  | NULL    |
+    +---------+--------+-----+-----------+---------+
+
+
+## all
+
+Alt sorgudaki bütün değerler true değerini verirse bu durumda değerleri verir.
+
+
+    select * from uyeler where sehir = ALL (select sehir from uyeler where yas > 40);
+
+
+## in
+
+IN operatörü bize sorgularımızı yazarken bir alanın içerisindeki değerleri bir değerler kümesi içerisinden çekmemize imkân sağlar.
+
+    select * from uyeler where yas in (40,20,51,99);
+
+    +-------+--------+-----+-----------+---------+
+    | isim  | soyad  | yas | sehir     | agirlik |
+    +-------+--------+-----+-----------+---------+
+    | ahmet | kaya   |  40 | İstanbul  | NULL    |
+    | ayşe  | yilmaz |  20 | Ankara    | NULL    |
+    +-------+--------+-----+-----------+---------+
+
+
+
+## not in
+
+in'in tam tersi bir şekilde içinde olmayan değerleri verir
+
+    select * from uyeler where yas not in (40,20,51,99);
+
+    +---------+--------+-----+-----------+---------+
+    | isim    | soyad  | yas | sehir     | agirlik |
+    +---------+--------+-----+-----------+---------+
+    | kerim   | durmaz |  25 | İzmir     | NULL    |
+    | buse    | yeşil  |  18 | Antalya   | NULL    |
+    | neriman | duran  |  55 | Konya     | NULL    |
+    | ahmet   | arslan |  56 | İstanbul  | NULL    |
+    +---------+--------+-----+-----------+---------+
+
+
+
+
+## sorgu için sorgu
+
+    select * from uyeler where sehir = any (select sehir_isim from sehirler);
+
+    +---------+--------+-----+-----------+---------+
+    | isim    | soyad  | yas | sehir     | agirlik |
+    +---------+--------+-----+-----------+---------+
+    | ahmet   | kaya   |  40 | İstanbul  | NULL    |
+    | ayşe    | yilmaz |  20 | Ankara    | NULL    |
+    | kerim   | durmaz |  25 | İzmir     | NULL    |
+    | neriman | duran  |  55 | Konya     | NULL    |
+    | ahmet   | arslan |  56 | İstanbul  | NULL    |
+    +---------+--------+-----+-----------+---------+
 
 
 
@@ -846,6 +968,553 @@ WHERE komutu gruplama fonksiyonları ile kullanılmadığından aynı görevi ya
 
 
 
+# Exist ve Not Exist
+
+EXISTS ifadesi kullanıldığında, alt sorguda istenilen şartın yerine getirildiği durumda bir üstteki sorgu değer üretir.
+
+NOT EXISTS ifadesi ise tam tersi olarak, alt sorguda istenilen şartın sağlanmadığı durumda bir üstteki sorgu değer üretir.
+
+    select * from uyeler where exists (select * from sehirler where uyeler.sehir = sehirler.sehir_isim);
+
+
+    +---------+--------+-----+-----------+---------+
+    | isim    | soyad  | yas | sehir     | agirlik |
+    +---------+--------+-----+-----------+---------+
+    | ahmet   | kaya   |  40 | İstanbul  | NULL    |
+    | ayşe    | yilmaz |  20 | Ankara    | NULL    |
+    | kerim   | durmaz |  25 | İzmir     | NULL    |
+    | neriman | duran  |  55 | Konya     | NULL    |
+    | ahmet   | arslan |  56 | İstanbul  | NULL    |
+    +---------+--------+-----+-----------+---------+
+
+ya da
+
+    select * from uyeler where not exists (select * from sehirler where uyeler.sehir = sehirler.sehir_isim);
+
+    +------+--------+-----+---------+---------+
+    | isim | soyad  | yas | sehir   | agirlik |
+    +------+--------+-----+---------+---------+
+    | buse | yeşil  |  18 | Antalya | NULL    |
+    +------+--------+-----+---------+---------+
+
+
+
+
+# User Variables
+
+Tanımlanan değişkenler MySQL içerisinde bulunan fonksiyonlarda da kullanılabilir. Bunlar silinemez, oturum kapatıldığında otomatik olarak hafızadan silinirler.
+
+## Sabit
+
+    set @ad := "ahmet";
+    select * from uyeler where isim = @ad;
+
+    +-------+--------+-----+-----------+---------+
+    | isim  | soyad  | yas | sehir     | agirlik |
+    +-------+--------+-----+-----------+---------+
+    | ahmet | kaya   |  40 | İstanbul  | NULL    |
+    | ahmet | arslan |  56 | İstanbul  | NULL    |
+    +-------+--------+-----+-----------+---------+
+
+
+## Ekrana Basma
+
+Oluşturulmuş bir değişkeni göstermeye yarar.
+
+    select @ad;
+
+    +-------+
+    | @ad   |
+    +-------+
+    | ahmet |
+    +-------+
+
+
+
+
+
+## Sorgularla
+
+    select @test := max(yas) from uyeler;
+    select @test;
+
+    +-------+
+    | @test |
+    +-------+
+    |    56 |
+    +-------+
+
+
+
+## Son değer mantığı
+
+Eğer birden fazla değer sonucu gönderiyorsak bu durumda sadece son değeri alır.
+
+
+    select @isimler:= isim from uyeler;
+    select @isimler;
+
+    +-----------------+
+    | @isimler:= isim |
+    +-----------------+
+    | ahmet           |
+    | ayşe            |
+    | kerim           |
+    | buse            |
+    | neriman         |
+    | ahmet           |
+    +-----------------+
+    
+    +----------+
+    | @isimler |
+    +----------+
+    | ahmet    |
+    +----------+
+
+
+## Set vs Select
+
+Set sadece 1 değişken atayabilirken, select birden fazla değişken atayabilir. Set sadece skaler bir değer atabilir.
+
+
+
+# abs
+
+Sayıların mutlak değerlerini alır
+
+    select abs(yas) from uyeler;
+
+    +----------+
+    | abs(yas) |
+    +----------+
+    |       40 |
+    |       20 |
+    |       25 |
+    |       18 |
+    |       55 |
+    |       56 |
+    +----------+
+
+
+# ceil ve floor
+
+Sayıları bir yukarı ya da bir aşağı doğru yuvarlamaya yarar.
+
+
+
+# mod
+
+Bir sayının başka bir sayıya bölümünden kalanı verir. Tek ve çiftleri bulmak için genel bir yoldur.
+
+    select mod(yas,3) from uyeler;
+
+
+    +------------+
+    | mod(yas,3) |
+    +------------+
+    |          1 |
+    |          2 |
+    |          1 |
+    |          0 |
+    |          1 |
+    |          2 |
+    +------------+
+
+
+
+## round
+
+Sayıyı verilen ondalık sayısı kadar yuvarlar. Böylece ondalıktan sonra kaç basamak gösterecek vs seçebiliyoruz.
+
+    select round (15.2525,1);
+
+    +-------------------+
+    | round (15.2525,1) |
+    +-------------------+
+    |              15.3 |
+    +-------------------+
+
+
+
+
+
+
+
+# DATES
+
+## Curdate ve Current_Date
+
+Bugünün şu anki tarihi verir. Sadece tarih verir, saat vs vermez.
+
+    select CURDATE();
+
+    +------------+
+    | CURDATE()  |
+    +------------+
+    | 2022-07-09 |
+    +------------+
+
+
+
+## current_timestamp ve now
+
+Şu anki saat ve dk ile beraber tarihi verirler.
+
+    select current_timestamp();
+
+    +---------------------+
+    | current_timestamp() |
+    +---------------------+
+    | 2022-07-09 21:44:18 |
+    +---------------------+
+
+ya da
+
+    select now();
+    
+    +---------------------+
+    | now()               |
+    +---------------------+
+    | 2022-07-13 15:58:05 |
+    +---------------------+
+
+
+
+## curtime
+
+Saat dakika ve saliseyi verir.
+
+    select curtime();
+
+    +-----------+
+    | curtime() |
+    +-----------+
+    | 21:44:57  |
+    +-----------+
+
+
+
+## DAYNAME
+
+Verilen tarihteki gün adını alır.
+
+    select DAYNAME(CURDATE());
+
+    +--------------------+
+    | DAYNAME(CURDATE()) |
+    +--------------------+
+    | Saturday           |
+    +--------------------+
+
+
+## DAYOFMONTH
+
+Verilen tarihte ayın kaçıncı günü olduğunu alır
+
+    select DAYOFMONTH(CURDATE());
+
+    +-----------------------+
+    | DAYOFMONTH(CURDATE()) |
+    +-----------------------+
+    |                     9 |
+    +-----------------------+
+
+
+## DAYOFWEEK
+
+Haftanın kaçıncı günü olduğunu verir ama saymaya 1 = Pazar ile başlar.
+
+(1 = Sunday, 2 = Monday, …, 7 = Saturday)
+
+    select DAYOFWEEK(CURDATE());
+    +----------------------+
+    | DAYOFWEEK(CURDATE()) |
+    +----------------------+
+    |                    7 |
+    +----------------------+
+
+
+## DAYOFYEAR
+
+Yılın kaçıncı günü olduğunu verir.
+
+    select DAYOFYEAR(CURDATE());
+
+    +----------------------+
+    | DAYOFYEAR(CURDATE()) |
+    +----------------------+
+    |                  190 |
+    +----------------------+
+
+
+
+## Year
+
+Tarihten yıl kısmını alır.
+
+    select year(curdate());
+
+    +-----------------+
+    | year(curdate()) |
+    +-----------------+
+    |            2022 |
+    +-----------------+
+
+## Week
+
+Tarihten hafta kısmını alır. Kaçıncı hafta olduğunu verir.
+
+    select week(curdate());
+
+    +-----------------+
+    | week(curdate()) |
+    +-----------------+
+    |              27 |
+    +-----------------+
+
+
+## DateDiff
+
+2 tarih arasındaki farkı almaya yarar. Farkı bir gün yapısı olarak verir.
+
+    select datediff(curdate(),"2021-03-11");
+
+    +----------------------------------+
+    | datediff(curdate(),"2021-03-11") |
+    +----------------------------------+
+    |                              485 |
+    +----------------------------------+
+
+
+
+## TIMESTAMPDIFF
+
+Gelen değerleri başka tarihsel özelliklere çevirebiliriz. Böylece karşılaştırmalar ya da seçimlerde kullanılabilir. Örneğin 485 günün kaç yıl yaptığını hesaplayabiliriz.
+
+    select datediff(curdate(),"2021-03-11"), TIMESTAMPDIFF(year,'2021-03-11', now() );
+
+    +----------------------------------+------------------------------------------+
+    | datediff(curdate(),"2021-03-11") | TIMESTAMPDIFF(year,'2021-03-11', now() ) |
+    +----------------------------------+------------------------------------------+
+    |                              485 |                                        1 |
+    +----------------------------------+------------------------------------------+
+
+
+
+
+
+## STR_TO_DATE
+
+The STR_TO_DATE() function returns a date based on a string and a format.
+
+https://www.w3schools.com/sql/func_mysql_str_to_date.asp#:~:text=The%20STR_TO_DATE()%20function%20returns,a%20string%20and%20a%20format
+
+    SELECT STR_TO_DATE("2017,8,14 10,40,10", "%Y,%m,%d %h,%i,%s");
+
+    +--------------------------------------------------------+
+    | STR_TO_DATE("2017,8,14 10,40,10", "%Y,%m,%d %h,%i,%s") |
+    +--------------------------------------------------------+
+    | 2017-08-14 10:40:10                                    |
+    +--------------------------------------------------------+
+
+
+
+## Sorgular
+
+Sorgularda belirli bir yıla eşit, aya eşit vs veriler almak istediğimizde içerikten o kısmı çıkarmamız ve sonrasında eşitlememiz gerekiyor.
+
+    Select * from Worker where year(JOINING_DATE) = 2014 and month(JOINING_DATE) = 2;
+
+    +-----------+------------+-----------+--------+---------------------+------------+
+    | WORKER_ID | FIRST_NAME | LAST_NAME | SALARY | JOINING_DATE        | DEPARTMENT |
+    +-----------+------------+-----------+--------+---------------------+------------+
+    |         1 | Monika     | Arora     | 100000 | 2014-02-20 09:00:00 | HR         |
+    |         3 | Vishal     | Singhal   | 300000 | 2014-02-20 09:00:00 | HR         |
+    |         4 | Amitabh    | Singh     | 500000 | 2014-02-20 09:00:00 | Admin      |
+    +-----------+------------+-----------+--------+---------------------+------------+
+
+
+
+# rand
+
+    select rand();
+
+    +---------------------+
+    | rand()              |
+    +---------------------+
+    | 0.37541017716323044 |
+    +---------------------+
+
+
+# IF
+
+IF(KOŞUL, DOĞRU, YANLIŞ) şeklinde bir yapı ile çalışır.
+
+    SELECT IF(5 > 6, "5 büyük", "6 büyük") AS sonuc;
+
+    +-----------+
+    | sonuc     |
+    +-----------+
+    | 6 büyük   |
+    +-----------+
+
+
+Eğer yapılar içerisinde kullanırsak
+
+    select IF(count(*)>1,"veri var","veri yok") as sonuc from uyeler where sehir = "İstanbul";
+    
+    +----------+
+    | sonuc    |
+    +----------+
+    | veri var |
+    +----------+
+
+
+    mysql> select IF(count(*)>2,"veri var","veri yok") as sonuc from uyeler where sehir = "İstanbul";
+    
+    +----------+
+    | sonuc    |
+    +----------+
+    | veri yok |
+    +----------+
+
+
+
+# Case
+
+İf sorgularına bir alternatif olarak kullanılır. Daha rahattır. İf, elseif, else gibi kavramları içerisinde barındırır.
+
+    select isim, 
+    case WHEN yas = 40 THEN "bu 40" 
+    WHEN yas > 30 then "orta" 
+    ELSE "değil" end as txt 
+    from uyeler;
+
+    +---------+--------+
+    | isim    | txt    |
+    +---------+--------+
+    | ahmet   | bu 40  |
+    | ayşe    | değil  |
+    | kerim   | değil  |
+    | buse    | değil  |
+    | neriman | orta   |
+    | ahmet   | orta   |
+    +---------+--------+
+
+Tek satırda bakacak olursak
+
+    select *, case WHEN yas = 40 THEN "bu 40" WHEN yas > 30 then "orta" ELSE "değil" end as txt from uyeler;
+
+
+
+
+# REGEX
+
+## RegExp
+
+Direkt olarak regex yapılarını kullanabilmemizi sağlar
+
+    select * from uyeler where isim REGEXP "^a";
+
+    +-------+--------+-----+-----------+---------+
+    | isim  | soyad  | yas | sehir     | agirlik |
+    +-------+--------+-----+-----------+---------+
+    | ahmet | kaya   |  40 | İstanbul  | NULL    |
+    | ayşe  | yilmaz |  20 | Ankara    | NULL    |
+    | ahmet | arslan |  56 | İstanbul  | NULL    |
+    +-------+--------+-----+-----------+---------+
+    
+ya da şeklinde kullanmak için
+
+    select * from uyeler where isim REGEXP "^a|met$";
+
+and kullanımı
+
+    select * from uyeler where isim REGEXP "^a" AND isim REGEXP "et$";
+
+    +-------+--------+-----+-----------+---------+
+    | isim  | soyad  | yas | sehir     | agirlik |
+    +-------+--------+-----+-----------+---------+
+    | ahmet | kaya   |  40 | İstanbul  | NULL    |
+    | ahmet | arslan |  56 | İstanbul  | NULL    |
+    +-------+--------+-----+-----------+---------+
+
+
+
+## Not Regexp
+
+
+Regex ile belirtilen kısmı karşılamayanları getirir
+
+    select * from uyeler where isim NOT REGEXP "et$";
+
+    +---------+--------+-----+---------+---------+
+    | isim    | soyad  | yas | sehir   | agirlik |
+    +---------+--------+-----+---------+---------+
+    | ayşe    | yilmaz |  20 | Ankara  | NULL    |
+    | kerim   | durmaz |  25 | İzmir   | NULL    |
+    | buse    | yeşil  |  18 | Antalya | NULL    |
+    | neriman | duran  |  55 | Konya   | NULL    |
+    +---------+--------+-----+---------+---------+
+
+
+
+## Regexp_Instr
+
+Karşılaştığı ilk sayısal olmayan karakterin(harf ya da noktalama işareti gibi) kaçıncı karakter olduğunu yazdırmak için kullanılır
+
+    SELECT isim, REGEXP_INSTR (isim, "r|e|o|u") as sonuc from uyeler;
+
+    +---------+-------+
+    | isim    | sonuc |
+    +---------+-------+
+    | ahmet   |     4 |
+    | ayşe    |     4 |
+    | kerim   |     2 |
+    | buse    |     2 |
+    | neriman |     2 |
+    | ahmet   |     4 |
+    +---------+-------+
+
+
+
+## Regexp_Replace
+
+Normal ifadeyle eşleşen alt dizeleri değiştirin. Karakterleri değiştirmeye yarar. Kalıcı değildir.
+
+    select *,regexp_replace(isim,"a","X") from uyeler;
+
+    +---------+--------+-----+-----------+---------+------------------------------+
+    | isim    | soyad  | yas | sehir     | agirlik | regexp_replace(isim,"a","X") |
+    +---------+--------+-----+-----------+---------+------------------------------+
+    | ahmet   | kaya   |  40 | İstanbul  | NULL    | Xhmet                        |
+    | ayşe    | yilmaz |  20 | Ankara    | NULL    | Xyşe                         |
+    | kerim   | durmaz |  25 | İzmir     | NULL    | kerim                        |
+    | buse    | yeşil  |  18 | Antalya   | NULL    | buse                         |
+    | neriman | duran  |  55 | Konya     | NULL    | nerimXn                      |
+    | ahmet   | arslan |  56 | İstanbul  | NULL    | Xhmet                        |
+    +---------+--------+-----+-----------+---------+------------------------------+
+
+
+
+## RLIKE
+
+MySQL'deki RLIKE operatörü, kalıp eşleştirme için kullanılır. Verilen dizelerin bir normal ifadeyle eşleşip eşleşmediğini belirlemek için kullanılır . Dizeler normal ifadeyle eşleşirse 1, eşleşme bulunamazsa 0 döndürür.
+
+Ah ile başlayanları aratıp bunlardan olanlara 1 olmayanlara 0 demesini sağlatıyoruz.
+
+    select isim RLIKE "^ah" from uyeler;
+    
+    +------------------+
+    | isim RLIKE "^ah" |
+    +------------------+
+    |                1 |
+    |                0 |
+    |                0 |
+    |                0 |
+    |                0 |
+    |                1 |
+    +------------------+
 
 
 
@@ -854,6 +1523,178 @@ WHERE komutu gruplama fonksiyonları ile kullanılmadığından aynı görevi ya
 
 
 
+# Nullif
+
+Eğer 2 ifade aynı ise null, değilse ilk ifadeyi verir.
+
+    select nullif (1,1);
+
+    +--------------+
+    | nullif (1,1) |
+    +--------------+
+    |         NULL |
+    +--------------+
+
+
+    select nullif (1,5);
+
+    +--------------+
+    | nullif (1,5) |
+    +--------------+
+    |            1 |
+    +--------------+
+
+
+# Ifnull
+
+Bu fonksiyonun amacı veritabanından gelen null değerini istediğimiz bir değere çevirebilmesidir.
+
+Bir kolon adı veriyoruz eğer burada null varsa onu neyle dolduracağımızı söylüyoruz
+
+    select *,ifnull(agirlik,10) from uyeler;
+
+    +---------+--------+-----+-----------+---------+--------------------+
+    | isim    | soyad  | yas | sehir     | agirlik | ifnull(agirlik,10) |
+    +---------+--------+-----+-----------+---------+--------------------+
+    | ahmet   | kaya   |  40 | İstanbul  | NULL    | 10                 |
+    | ayşe    | yilmaz |  20 | Ankara    | 15      | 15                 |
+    | kerim   | durmaz |  25 | İzmir     | 15      | 15                 |
+    | buse    | yeşil  |  18 | Antalya   | 15      | 15                 |
+    | neriman | duran  |  55 | Konya     | NULL    | 10                 |
+    | ahmet   | arslan |  56 | İstanbul  | NULL    | 10                 |
+    +---------+--------+-----+-----------+---------+--------------------+
+
+
+
+# Upper and lower
+
+Büyük ve küçük yazmak için kullanılır
+
+    select upper(isim),lower(isim) from uyeler;
+
+    +-------------+-------------+
+    | upper(isim) | lower(isim) |
+    +-------------+-------------+
+    | AHMET       | ahmet       |
+    | AYŞE        | ayşe        |
+    | KERIM       | kerim       |
+    | BUSE        | buse        |
+    | NERIMAN     | neriman     |
+    | AHMET       | ahmet       |
+    +-------------+-------------+
+
+
+
+
+
+# User
+
+Geçerli MySQL kullanıcı adını verir
+
+    select user();
+
+    +----------------+
+    | user()         |
+    +----------------+
+    | root@localhost |
+    +----------------+
+
+
+# User List
+
+Tüm mysql kullanıcıları listesini verir
+
+    select user from mysql.user;
+
+    +------------------+
+    | user             |
+    +------------------+
+    | debian-sys-maint |
+    | mysql.infoschema |
+    | mysql.session    |
+    | mysql.sys        |
+    | root             |
+    +------------------+
+
+
+Daha detaylı bir liste için
+
+    select user,host,account_locked,password_expired from mysql.user;
+
+    +------------------+-----------+----------------+------------------+
+    | user             | host      | account_locked | password_expired |
+    +------------------+-----------+----------------+------------------+
+    | debian-sys-maint | localhost | N              | N                |
+    | mysql.infoschema | localhost | Y              | N                |
+    | mysql.session    | localhost | Y              | N                |
+    | mysql.sys        | localhost | Y              | N                |
+    | root             | localhost | N              | N                |
+    +------------------+-----------+----------------+------------------+
+    
+
+
+
+
+# Şifre değiştirmek
+
+    ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'new-password';
+
+
+
+
+# Yedek
+
+## Yedek Alma
+
+Komple 
+
+    mysqldump -u root -p --all-databases > dump.sql
+
+Sadece bir veritabanının yedeğini almak
+
+    mysqldump -u root -p --databases ornek > dump.sql
+
+
+## Yedeği Yükleme
+
+Öncelikle o ada sahip bir veritabanı oluşturmak gerekiyor. Yüklecek bir veritabanı oluşturuyoruz.
+
+    create database ornek;
+
+Sonrasında buna yükleme yapıyoruz
+
+    mysql -u root -p ornek < dump.sql
+
+
+
+# Status
+
+Genel bilgiler
+
+    mysql> status
+    
+    --------------
+    mysql  Ver 8.0.29-0ubuntu0.20.04.3 for Linux on x86_64 ((Ubuntu))
+
+    Connection id:          36
+    Current database:       ornek
+    Current user:           root@localhost
+    SSL:                    Not in use
+    Current pager:          stdout
+    Using outfile:          ''
+    Using delimiter:        ;
+    Server version:         8.0.29-0ubuntu0.20.04.3 (Ubuntu)
+    Protocol version:       10
+    Connection:             Localhost via UNIX socket
+    Server characterset:    utf8mb4
+    Db     characterset:    utf8mb4
+    Client characterset:    utf8mb4
+    Conn.  characterset:    utf8mb4
+    UNIX socket:            /var/run/mysqld/mysqld.sock
+    Binary data as:         Hexadecimal
+    Uptime:                 51 min 52 sec
+
+    Threads: 2  Questions: 922  Slow queries: 0  Opens: 1727  Flush tables: 3  Open tables: 218  Queries per second avg: 0.296
 
 
 
@@ -861,25 +1702,138 @@ WHERE komutu gruplama fonksiyonları ile kullanılmadığından aynı görevi ya
 
 
 
+# substring
+
+Bir karakter aralığını çekip almamızı sağlar. Bir yazılı ifadenin belirli bir alanını slice etmemizi sağlar.
+
+    Select substring(FIRST_NAME,1,3) from Worker;
 
 
 
 
+# Instr
+
+INSTR fonksiyonu parametre olarak verilen metin içerisinde, yine parametre olarak verilen metin parçasını arar ve bulduğu durumda arama sonucunun indeksini sonuç olarak geri döndürür.
+
+    Select INSTR(FIRST_NAME, "tab") from Worker where FIRST_NAME = 'Amitabh';
+
+    +--------------------------+
+    | INSTR(FIRST_NAME, "tab") |
+    +--------------------------+
+    |                        4 |
+    +--------------------------+
 
 
 
 
+# Trim, Rtrim, Ltrim
+
+
+LTRIM() fonksiyonu, dizinin baştaki tüm boşlukları ve dizinin sol tarafındaki boşlukları temizlemek için kullanılır.
+
+RTRIM() fonksiyonu, tüm bitiş boşluklarını ve dizinin sağ tarafında yer alan tüm boşlukların temizlenmesi için kullanılır.
+
+TRIM() fonksiyonu ile her ikisinin yaptığı işlevi yapmakla beraber çok daha fazlasını yapabilirsiniz.
+
+    Select RTRIM(FIRST_NAME) from Worker;
+
+    +-------------------+
+    | RTRIM(FIRST_NAME) |
+    +-------------------+
+    | Monika            |
+    | Niharika          |
+    | Vishal            |
+    | Amitabh           |
+    | Vivek             |
+    | Vipul             |
+    | Satish            |
+    | Geetika           |
+    +-------------------+
 
 
 
 
+# length
+
+Bir string'in karakter uzunluğunu vermeye yarar.
+
+    select length(FIRST_NAME) from Worker;
+
+    +--------------------+
+    | length(FIRST_NAME) |
+    +--------------------+
+    |                  6 |
+    |                  8 |
+    |                  6 |
+    |                  7 |
+    |                  5 |
+    |                  5 |
+    |                  6 |
+    |                  7 |
+    +--------------------+
 
 
 
 
+# Replace
+
+Direkt olarak karakterleri değiştirmeye yarıyor. regexp_replace ile aynı yönde ilerler. regexp_replace ile update yapmak sorun iken bunda değil.
+
+    Select REPLACE(FIRST_NAME,'a','A') from Worker;
+
+    +-----------------------------+
+    | REPLACE(FIRST_NAME,'a','A') |
+    +-----------------------------+
+    | MonikA                      |
+    | NihArikA                    |
+    | VishAl                      |
+    | AmitAbh                     |
+    | Vivek                       |
+    | Vipul                       |
+    | SAtish                      |
+    | GeetikA                     |
+    +-----------------------------+
+
+## Update
+
+    update uyeler set isim = REPLACE(isim,"se","sa") where isim = "buse";
+
+    mysql> select * from uyeler;
+    +---------+--------+-----+-----------+---------+
+    | isim    | soyad  | yas | sehir     | agirlik |
+    +---------+--------+-----+-----------+---------+
+    | ahmet   | kaya   |  40 | İstanbul  | NULL    |
+    | ayşe    | yilmaz |  20 | Ankara    | 15      |
+    | kerim   | durmaz |  25 | İzmir     | 15      |
+    | busa    | yeşil  |  18 | Antalya   | 15      |
+    | neriman | duran  |  55 | Konya     | NULL    |
+    | ahmet   | arslan |  56 | İstanbul  | NULL    |
+    +---------+--------+-----+-----------+---------+
 
 
 
+# between
+
+Verilen bir sayısal aralığı arar. İlk ve son değer dahildir.
+
+    Select * from Worker where SALARY between 100000 and 500000;
+
+    +-----------+------------+-----------+--------+---------------------+------------+
+    | WORKER_ID | FIRST_NAME | LAST_NAME | SALARY | JOINING_DATE        | DEPARTMENT |
+    +-----------+------------+-----------+--------+---------------------+------------+
+    |         1 | Monika     | Arora     | 100000 | 2014-02-20 09:00:00 | HR         |
+    |         3 | Vishal     | Singhal   | 300000 | 2014-02-20 09:00:00 | HR         |
+    |         4 | Amitabh    | Singh     | 500000 | 2014-02-20 09:00:00 | Admin      |
+    |         5 | Vivek      | Bhati     | 500000 | 2014-06-11 09:00:00 | Admin      |
+    |         6 | Vipul      | Diwan     | 200000 | 2014-06-11 09:00:00 | Account    |
+    +-----------+------------+-----------+--------+---------------------+------------+
+
+
+# Düzgün Çıktı
+
+Pretty gibi daha düzgün çıktılar için
+
+    select * from uyeler \G;
 
 
 
