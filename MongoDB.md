@@ -118,9 +118,11 @@ Verilen şarta ve yapıya göre çoklu silme işlemi yapıyor.
 
 ### updateOne
 
+    db.uyeler.updateOne({"isim": "Ahmet"}, {$set: {price: 899}})
 
+### updateMany
 
-
+    db.deneme.updateMany({"isim": "Ahmet"}, {$set: {"price": 1000}})
 
 
 
