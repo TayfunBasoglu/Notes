@@ -274,6 +274,81 @@ not equal anlamındadadır
 
 
 
+# Logical
+
+## $and
+
+Sorgu tümcelerini mantıksal bir AND ile birleştirir, her iki tümcenin koşullarıyla eşleşen tüm belgeleri döndürür.
+
+And'den sonra sıra sıra şartları veriyoruz şeklinde bir yapı vardır.
+
+    db.uyeler.find( { $and: [ { yas: { $gt: 40 } }, { isim: "Ahmet"} ] } )
+
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e3"), "isim" : "Ahmet", "yas" : 50, "sehir" : "Kanada" }
+
+
+
+## $not
+
+Bu sorgunun tersini verir. Normalde 20'den büyükleri vermesi lazım ama bunu not içerisine aldık böylece tersini veriyor.
+
+    db.uyeler.find( { yas: { $not: { $gt: 20 } } } )
+
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e5"), "isim" : "Ayşe", "yas" : 15, "sehir" : "İstanbul", "Kedi" : 1 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e9"), "isim" : "İsmail", "yas" : 18, "sehir" : "İstanbul", "Kedi" : 1 }
+
+
+## $nor
+
+Sorgu tümcelerini mantıksal bir NOR ile birleştirir, her iki tümceyle eşleşmeyen tüm belgeleri döndürür. Verilen şartlara uymayan verileri getirir
+
+    db.uyeler.find( { $nor: [ { yas: 40 }, { isim: "Ayşe" } ]  })
+
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e3"), "isim" : "Ahmet", "yas" : 50, "sehir" : "Kanada" }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e6"), "isim" : "Kerim", "yas" : 22, "sehir" : "İzmir", "Kedi" : 0 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e7"), "isim" : "Davut", "yas" : 35, "sehir" : "Ankara", "Kedi" : 1 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e8"), "isim" : "Gül", "yas" : 50, "sehir" : "Muş", "Kedi" : 1 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e9"), "isim" : "İsmail", "yas" : 18, "sehir" : "İstanbul", "Kedi" : 1 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6ea"), "isim" : "Mustafa", "yas" : 21, "sehir" : "İstanbul", "Kedi" : 0 }
+
+
+
+## $or
+
+Verilen şartlardan birine vs uyan verileri getirir
+
+    db.uyeler.find( { $or: [ { yas: 40 }, { isim: "Ayşe" } ]  })
+
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e0"), "isim" : "Ayşe", "yas" : 22, "sehir" : "İzmir" }
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e1"), "isim" : "Kerim", "yas" : 40, "sehir" : "İstanbul" }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e5"), "isim" : "Ayşe", "yas" : 15, "sehir" : "İstanbul", "Kedi" : 1 }
+
+
+
+
+
+https://www.mongodb.com/docs/manual/reference/operator/query/#element
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
