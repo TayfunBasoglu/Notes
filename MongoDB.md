@@ -21,6 +21,7 @@ Diğer yapılardan farklı olarak içerisine collection oluşturmadığımız s�
 
     use deneme;
 
+Aynı zamanda use dediğimiz zaman artık onu kullanıyor oluyoruz ve adını db olarak kısa bir şekilde kullanabiliyoruz. Yol verirken **db.collectionname** şeklinde yapıyoruz.
 
 ## Silme
 
@@ -82,17 +83,40 @@ Ya da table olarak değerlerlendirmek istersek
 
 # Document
 
+## Eklemek
+
+### insertOne
+
+Bir tane eklemeye yarar.
+
+    db.uyeler.insertOne({"isim":"Ahmet","yas":15,"sehir":"İstanbul"})
 
 
+### insertMany
+
+Çoklu veri eklemeyi sağlar. Bir liste şeklinde ekleme yapıyoruz.
+
+    db.uyeler.insertMany([{"isim":"Ayşe","yas":22,"sehir":"İzmir"}, {"isim":"Kerim","yas":40,"sehir":"İstanbul"}, {"isim":"Davut","yas":40,"sehir":"Ankara"}, {"isim":"Ahmet","yas":50,"sehir":"Kanada"}])
 
 
+## Silmek
+
+### deleteOne
+
+Sadece bir tane silmeye yarıyor. Verilen özellikte olan ilk gördüğü değeri siliyor.
+
+    db.uyeler.deleteOne({"isim":"Ahmet"})
+
+### deleteMany
+
+Verilen şarta ve yapıya göre çoklu silme işlemi yapıyor.
+
+    db.uyeler.deleteMany({"isim":"Davut"})
 
 
+## Güncelleme
 
-
-
-
-
+### updateOne
 
 
 
