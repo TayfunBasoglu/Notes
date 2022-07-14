@@ -440,7 +440,7 @@ Index yapılarına bakabilmemizi sağlar.
     ]
 
 
-## silme
+## dropIndex
 
 Indexleri silmek için
 
