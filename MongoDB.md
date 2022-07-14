@@ -388,9 +388,9 @@ Düzgün isim örneği için
 
 
 
+# aggregation
 
-
-# $group
+## $group
 
 Verileri gruplamaya yarar. Verdiğimiz değere göre verileri grupluyor. Burada **$** işareti unutulmamalı.
 
@@ -406,6 +406,54 @@ Eğer her veride ne kadar eleman olduğunu öğrenmek istersek sum kullanmamız 
     { "_id" : "Kanada", "personel_sayisi" : 1 }
     { "_id" : "Ankara", "personel_sayisi" : 1 }
     { "_id" : "İzmir", "personel_sayisi" : 2 }
+
+
+## sample
+
+Rastgele örnekler alabilmemizi sağlar. Verilen değer kadar örnek alır.
+
+    db.uyeler.aggregate({$sample:{size:3}})
+
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e1"), "isim" : "Kerim", "yas" : 21, "sehir" : "İstanbul" }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e5"), "isim" : "Ayşe", "yas" : 15, "sehir" : "İstanbul", "Kedi" : 1 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e7"), "isim" : "Davut", "yas" : 35, "sehir" : "Ankara", "Kedi" : 1 }
+
+
+
+## sort
+
+Artan sıralama için 1, azalan sıralama için -1 kullanıyoruz.
+
+    db.uyeler.aggregate({$sort:{"yas":1,"isim":-1}})
+
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e5"), "isim" : "Ayşe", "yas" : 15, "sehir" : "İstanbul", "Kedi" : 1 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e9"), "isim" : "İsmail", "yas" : 18, "sehir" : "İstanbul", "Kedi" : 1 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6ea"), "isim" : "Mustafa", "yas" : 21, "sehir" : "İstanbul", "Kedi" : 0 }
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e1"), "isim" : "Kerim", "yas" : 21, "sehir" : "İstanbul" }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e6"), "isim" : "Kerim", "yas" : 22, "sehir" : "İzmir", "Kedi" : 0 }
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e0"), "isim" : "Ayşe", "yas" : 22, "sehir" : "İzmir" }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e7"), "isim" : "Davut", "yas" : 35, "sehir" : "Ankara", "Kedi" : 1 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e8"), "isim" : "Gül", "yas" : 50, "sehir" : "Muş", "Kedi" : 1 }
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e3"), "isim" : "Ahmet", "yas" : 50, "sehir" : "Kanada" }
+
+
+
+
+
+
+
+
+
+# limit
+
+Gelecek verileri limitlemeye yarar
+
+    db.uyeler.find().limit(2)
+
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e0"), "isim" : "Ayşe", "yas" : 22, "sehir" : "İzmir" }
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e1"), "isim" : "Kerim", "yas" : 21, "sehir" : "İstanbul" }
+
+
 
 
 # sum
@@ -523,11 +571,6 @@ Popülasyon standart sapmalarını verir.
     { "_id" : "Kanada", "yaslarin_toplami" : null }
     { "_id" : "Ankara", "yaslarin_toplami" : null }
     { "_id" : "İzmir", "yaslarin_toplami" : 0 }
-
-
-
-
-
 
 
 
