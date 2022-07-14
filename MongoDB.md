@@ -327,16 +327,60 @@ Verilen şartlardan birine vs uyan verileri getirir
 
 
 
-https://www.mongodb.com/docs/manual/reference/operator/query/#element
+# Evaluation
+
+## $regex
+
+Regex kullanım imkanı verir.
+
+Genel yapı şu şekilde
+
+    {alan : {"$regex":/pattern/ , $options : "options"}}
+
+Options kısmı için
+
+    i : Büyük küçük harf duyarsızlığı
+    m : Her satırın başı ve sonu eşleştirmesi
+    s : Yeni satır ve nokta gibi karakterlere izin
 
 
+Tırnak içerilerine yazabiliriz ya da **//** şeklinde yapı kullanabiliriz.
+
+^a yerine direkt a kullanınca içinde olması yeter diyor ona göre hepsini veriyor. İçinde olan değerleri vermiş oluyor.
 
 
+    db.uyeler.find({isim:{"$regex":"a", $options:"i"}})
+
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e0"), "isim" : "Ayşe", "yas" : 22, "sehir" : "İzmir" }
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e3"), "isim" : "Ahmet", "yas" : 50, "sehir" : "Kanada" }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e5"), "isim" : "Ayşe", "yas" : 15, "sehir" : "İstanbul", "Kedi" : 1 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e7"), "isim" : "Davut", "yas" : 35, "sehir" : "Ankara", "Kedi" : 1 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e9"), "isim" : "İsmail", "yas" : 18, "sehir" : "İstanbul", "Kedi" : 1 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6ea"), "isim" : "Mustafa", "yas" : 21, "sehir" : "İstanbul", "Kedi" : 0 }
+
+    > db.uyeler.find({isim:{"$regex":"^a", $options:"i"}})
+    > 
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e0"), "isim" : "Ayşe", "yas" : 22, "sehir" : "İzmir" }
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e3"), "isim" : "Ahmet", "yas" : 50, "sehir" : "Kanada" }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e5"), "isim" : "Ayşe", "yas" : 15, "sehir" : "İstanbul", "Kedi" : 1 }
 
 
+Düzgün isim örneği için
+
+    db.uyeler.find({isim:{"$regex":"^Da"}})
+
+        { "_id" : ObjectId("62cefa756592bf0fab88e6e7"), "isim" : "Davut", "yas" : 35, "sehir" : "Ankara", "Kedi" : 1 }
+
+    db.uyeler.find({isim:{"$regex":/^Da/}})
+
+        { "_id" : ObjectId("62cefa756592bf0fab88e6e7"), "isim" : "Davut", "yas" : 35, "sehir" : "Ankara", "Kedi" : 1 }
 
 
+Örneğin büyük ve küçük harf duyarsızlığını açmamız gerekirse
 
+    db.uyeler.find({isim:{"$regex":/^da/, $options:"i"}})
+
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e7"), "isim" : "Davut", "yas" : 35, "sehir" : "Ankara", "Kedi" : 1 }
 
 
 
