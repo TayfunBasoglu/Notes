@@ -326,10 +326,7 @@ Verilen şartlardan birine vs uyan verileri getirir
 
 
 
-
-# Evaluation
-
-## $regex
+# regex
 
 Regex kullanım imkanı verir.
 
