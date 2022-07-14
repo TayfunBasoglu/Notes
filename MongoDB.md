@@ -384,24 +384,85 @@ Düzgün isim örneği için
 
 
 
+# Index
+
+Default olarak, MongoDB, her koleksiyon için, id alanı üzerinde bir indeks oluşturur. 
+
+## createIndex
+
+Index oluşturmak için kullanılır.
+
+    db.uyeler.createIndex({ indeks : 1 })
+
+1 değeri kullanılmışsa indeks sicile göre artan (ascending) biçimde oluşturulacaktır; yani sicil değerleri küçükten büyüğe doğru sıralanacaktır.
+
+-1 değeri kullanılırsa da indeks değerleri büyükten küçüğe yani azalan (descending) biçimde sıralanacaktır.
+
+
+**Burada direkt dümdüz oluşturduğumuzda bu index değerleri tekrar edebilir bir yapıda oluyorlar. Tekrar edemeyen değerler olmaları için unique veriyoruz.**
+
+_id  indeksi de unique bir indekstir. Bazı durumlarda başka bir alan üzerinden unique indeks oluşturmaktansa, bunun yerine _id indeksi ile işlem yapmak daha uygun olabilir.
+
+Her değer için bağımsız olacağından bunu önceden koleksiyon boşken eklemek gerekiyor.
+
+    db.icerikler.createIndex({"numaralar":1},{unique:true})
+    
+             {
+            "numIndexesBefore" : 1,
+            "numIndexesAfter" : 2,
+            "createdCollectionAutomatically" : false,
+            "ok" : 1
 
 
 
 
+## getIndexes
+
+Index yapılarına bakabilmemizi sağlar.
+
+    db.uyeler.getIndexes()
+    
+    [
+            {
+                    "v" : 2,
+                    "key" : {
+                            "_id" : 1
+                    },
+                    "name" : "_id_"
+            },
+            {
+                    "v" : 2,
+                    "key" : {
+                            "indeks" : 1
+                    },
+                    "name" : "indeks_1"
+            }
+    ]
+
+
+## silme
+
+Indexleri silmek için
+
+    db.uyeler.dropIndex("indeks_1")
+
+        { "nIndexesWas" : 2, "ok" : 1 }
+
+    > db.uyeler.getIndexes()
+    
+        [ { "v" : 2, "key" : { "_id" : 1 }, "name" : "_id_" } ]
+
+Tüm indexleri silmek için
+
+    db.uyeler.dropIndexes()
 
 
 
+## dropDups
 
+Oluştururken tekrar eden index değerlerini silmeye yarar.
 
-
-
-
-
-
-
-
-
-
+    db.uyeler.createIndex( { a: 1 }, { unique: true, dropDups: true } )
 
 
 
