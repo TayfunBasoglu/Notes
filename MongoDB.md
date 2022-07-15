@@ -390,6 +390,73 @@ Düzgün isim örneği için
 
 
 
+# count ve length
+
+Verileri saydırmaya yarar.
+
+    db.uyeler.find().count()
+
+    10
+
+Direkt bunu find yerine kullanıp bu şekilde de arayabiliyoruz
+
+    db.uyeler.count()
+    
+    10
+
+
+
+
+
+
+
+
+
+
+# aggregate
+
+Bir çok belgeyi işler ve bunlara yapılan işlemlerin bir sonucu döndüren ana yapıdır. Bir pipeline yapısı vardır. Bir işlem yapılır, çıktıları alınır sonrasında belirtilen işleme bu çıktılar gönderilir.
+
+## group
+
+Verileri mysql'de vs olduğu gibi gruplamaya yarar. Normalde veriler id değerleine göre gruplanıyor olarak düşünebiliriz. Böylece her veri 1 grubu temsil ediyor ve tekillik sağlanıyor. Bu şekilde gruplama yaparken bu id değerini gruplamak istediğimiz değer ile değiştirerek gruplama yapıyoruz. Burada bir değişken olarak verdiğimiz için **$alan** şeklinde veriyoruz.
+
+    db.uyeler.aggregate({$group:{_id:"$sehir"}})
+    
+    { "_id" : "İzmir" }
+    { "_id" : "İstanbul" }
+    { "_id" : "Kanada" }
+    { "_id" : "Ankara" }
+    { "_id" : "Muş" }
+
+
+## sum
+
+**Sonrasında count, sum gibi değerler kullanarak pipeline yapısına devam edebilir ve bu şekilde bu gruplardaki eleman sayılarını vs alabiliriz.**
+
+Örnek grup sayısını almak istersek
+
+    db.uyeler.aggregate([{$group:{_id:"$sehir"}},{$count:"total"}])
+
+    { "total" : 5 }
+
+<code>Grupların eleman sayısını almak istersek</code>
+
+Burada sum değeri bir çarpan sayısı. 2 verirsek istanbul 4 yerine 8 oluyor her şeyi 2 ile çarpıyor. Bu yüzden çarpan 1. Eğer count'u group içerisine yazarsak grupladıktan sonra grup içindeki elemanları sayıyor ya da her gruba ait ortalamayı vs veriyor. Bunu eğer pipline mantığında group dışına yazarsak bu sefer gruplar arasındaki değerleri veriyor.
+
+    db.uyeler.aggregate([{$group : {_id:"$sehir", count:{$sum:1}}}])
+
+    { "_id" : "İstanbul", "count" : 4 }
+    { "_id" : "Muş", "count" : 1 }
+    { "_id" : "Kanada", "count" : 1 }
+    { "_id" : "Ankara", "count" : 1 }
+    { "_id" : "İzmir", "count" : 3 }
+
+
+**Eğer genel olarak bütün yaşların toplamını istersek bu durumda gruplama değerini null yaparız böylece grup olmaz ve bize genel toplamı verir.**
+
+
+
 
 
 
