@@ -406,6 +406,16 @@ Direkt bunu find yerine kullanıp bu şekilde de arayabiliyoruz
 
 
 
+# limit
+
+gelen veriye limit getirmemizi sağlar.
+
+    db.uyeler.find().limit(2)
+    
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e0"), "isim" : "Ayşe", "yas" : 22, "sehir" : "İzmir" }
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e1"), "isim" : "Kerim", "yas" : 21, "sehir" : "İstanbul" }
+
+
 
 
 
@@ -456,10 +466,53 @@ Burada sum değeri bir çarpan sayısı. 2 verirsek istanbul 4 yerine 8 oluyor h
 **Eğer genel olarak bütün yaşların toplamını istersek bu durumda gruplama değerini null yaparız böylece grup olmaz ve bize genel toplamı verir.**
 
 
+    db.uyeler.aggregate([{ $group: { _id : null, yaslarin_toplami : { $sum: "$yas" } } }])
+
+    { "_id" : null, "yaslarin_toplami" : 294 }
 
 
 
+## avg
 
+Verilen alanların ortalamasını bulmaya yarar. Örneği gruplama vermeden toplam yaş'ın ortalamasına bakalım.
+
+    db.uyeler.aggregate([{ $group: { _id : null, ortalama : { $avg: "$yas" } } }])
+
+    { "_id" : null, "ortalama" : 29.4 }
+
+
+
+## match 
+
+Eşleşme için kullanılan temel fonksiyon yapısıdır. Normaldeki gibi find kullanmadığımız için bu tip yapılarda bu özeliği kullanıyoruz.
+
+    db.uyeler.aggregate([{$match : {"sehir":"İstanbul"}}])
+    
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e1"), "isim" : "Kerim", "yas" : 21, "sehir" : "İstanbul" }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e5"), "isim" : "Ayşe", "yas" : 15, "sehir" : "İstanbul", "Kedi" : 1 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e9"), "isim" : "İsmail", "yas" : 18, "sehir" : "İstanbul", "Kedi" : 1 }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6ea"), "isim" : "Mustafa", "yas" : 21, "sehir" : "İstanbul", "Kedi" : 0 }
+
+Örneğin sadece istanbul'un ortalamasını almaya çalışırsak önce eşleşenleri bulup sonrasında her birini bir grup olarak ele alıp avg uygulayabiliriz.
+
+    db.uyeler.aggregate([{$match : {"sehir":"İstanbul"}}, { $group: { _id : null, ortalama : { $avg: "$yas" } } }])
+
+    { "_id" : null, "ortalama" : 18.75 }
+
+ya da bunu önce gruplayıp sonra bunların ortalamarından match yapıp oradan da alabiliriz
+
+    db.uyeler.aggregate([{$group : {_id : "$sehir", ortalama : {$avg : "$yas"}}}, {$match : {"_id":"İstanbul"}}])
+
+
+
+## limit
+
+pipeline içerisinde de limit kullanabiliyoruz.
+
+    db.uyeler.aggregate([{$match : {"sehir":"İstanbul"}}, {$limit:2}])
+    
+    { "_id" : ObjectId("62cee0756592bf0fab88e6e1"), "isim" : "Kerim", "yas" : 21, "sehir" : "İstanbul" }
+    { "_id" : ObjectId("62cefa756592bf0fab88e6e5"), "isim" : "Ayşe", "yas" : 15, "sehir" : "İstanbul", "Kedi" : 1 }
 
 
 
